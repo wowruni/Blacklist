@@ -116,81 +116,62 @@ function AddMenuItems()
 end
 
 
-local Orig_ChatFrame_MessageEventHandler;
--- Hooks onto the functions needed
-function BlackList:HookFunctions()
-
-	Orig_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
-	ChatFrame_MessageEventHandler = BL_MessageEventHandler;
-end
-
--- Hooked ChatFrame_MessageEventHandler function
-function BL_MessageEventHandler(event, ...)
-
+local function myChatFilter(self, event, msg, author, ...)
 	local warnplayer, warnname  = false, nil;
-	
-	if (strsub(tostring(event), 1, 8) == "CHAT_MSG") then
-		local event = tostring(event);
-		local type = string.sub(event, 10);
-
-		for key, channel in pairs(BL_Blocked_Channels) do
-			if (type == channel) then
-				-- search for player name
-				local name = arg2;
-				if (BlackList:GetIndexByName(name) > 0) then
-					local player = BlackList:GetPlayerByIndex(BlackList:GetIndexByName(name));
-					
-					if (player["ignore"]) then
-						-- respond to whisper
-						if (type == "WHISPER") then
-							local alreadywarned = false;
-							for key, warnedname in pairs(Already_Warned_For["WHISPER"]) do
-								if (name == warnedname) then
-									alreadywarned = true;
-								end
-							end
-							
-							if (not alreadywarned) then
-								table.insert(Already_Warned_For["WHISPER"], name);
-								SendChatMessage(PLAYER_IGNORING, "WHISPER", nil, name);
-							end
-							-- block communication
-							return;
-						elseif (type == "WHISPER_INFORM") then
-							warnplayer = true;
-							warnname = name;
-						end
-					elseif (player["warn"]) then
-						-- warn player
-						if (type == "WHISPER") then
-							local alreadywarned = false;
-
-							for key, warnedname in pairs(Already_Warned_For["WHISPER"]) do
-								if (name == warnedname) then
-									alreadywarned = true;
-								end
-							end
-
-							if (not alreadywarned) then
-								table.insert(Already_Warned_For["WHISPER"], name);
-								warnplayer = true;
-								warnname = name;
-							end
-						end
+	local event = string.sub(event, 10);
+	if (BlackList:GetIndexByName(author) > 0) then
+		local player = BlackList:GetPlayerByIndex(BlackList:GetIndexByName(author));
+		if (player["ignore"]) then
+			-- respond to whisper
+			if (event == "WHISPER") then
+				local alreadywarned = false;
+				for key, warnedname in pairs(Already_Warned_For["WHISPER"]) do
+					if (author == warnedname) then
+						alreadywarned = true;
 					end
+				end
+
+				if (not alreadywarned) then
+					table.insert(Already_Warned_For["WHISPER"], author);
+					SendChatMessage(PLAYER_IGNORING, "WHISPER", nil, author);
+				end
+
+			elseif (event == "WHISPER_INFORM") then
+				warnplayer = true;
+				warnname = author;
+			end
+			-- block communication
+			return true;
+		elseif (player["warn"]) then
+			-- warn player
+			if (event == "WHISPER") then
+				local alreadywarned = false;
+
+				for key, warnedname in pairs(Already_Warned_For["WHISPER"]) do
+					if (author == warnedname) then
+						alreadywarned = true;
+					end
+				end
+
+				if (not alreadywarned) then
+					table.insert(Already_Warned_For["WHISPER"], author);
+					warnplayer = true;
+					warnname = author;
 				end
 			end
 		end
+		if (warnplayer) then this:AddMessage(warnname .. " is on your blacklist", 1.0, 0.0, 0.0); end
+	else
+		return false
 	end
+end
 
-	local returnvalue = Orig_ChatFrame_MessageEventHandler(event, ...);
+function BlackList:HookFunctions()
 
-	if (warnplayer) then
-		this:AddMessage(warnname .. " is on your blacklist", 1.0, 0.0, 0.0);
+	for key, channel in pairs(BL_Blocked_Channels) do
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_"..channel, myChatFilter);
 	end
-
-	return returnvalue;
-
+	
 end
 
 -- Registers slash cmds
