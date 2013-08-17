@@ -13,7 +13,7 @@ ALREADY_BLACKLISTED		= "is already in Black List.";
 ADDED_TO_BLACKLIST		= "added to Black List."
 REMOVED_FROM_BLACKLIST		= "removed from Black List."
 
-BLACKLIST				= "BL";
+BLACKLIST				= "Blacklist";
 BL_PLAYER 			= "Add Player";
 REMOVE_PLAYER 			= "Remove Player";
 OPTIONS 				= "Options";
@@ -84,7 +84,6 @@ function BlackList:ClickBlackList()
 	self:SetSelectedBlackList(index);
 	self:UpdateUI();
  	self:ShowDetails();
-
 end
 
 function BlackList:SetSelectedBlackList(index)
@@ -103,8 +102,8 @@ function BlackList:ShowTab()
 
 	FriendsFrameTopLeft:SetTexture("Interface\\FriendsFrame\\UI-FriendsFrame-TopLeft-bnet");
 	FriendsFrameTopRight:SetTexture("Interface\\FriendsFrame\\UI-FriendsFrame-TopRight-bnet");	
-	FriendsFrameBottomLeft:SetTexture("Interface\\FriendsFrame\\UI-FriendsFrame-BotLeft");
-	FriendsFrameBottomRight:SetTexture("Interface\\FriendsFrame\\UI-FriendsFrame-BotRight");
+	FriendsFrameBottomLeft:SetTexture("Interface\\FriendsFrame\\UI-FriendsFrame-Pending-BotLeft");
+	FriendsFrameBottomRight:SetTexture("Interface\\FriendsFrame\\UI-FriendsFrame-Pending-BotRight");
 	FriendsFrameTitleText:SetText("Black List");
 	FriendsFrame_ShowSubFrame("BlackListFrame");
 	PanelTemplates_SetTab(FriendsTabHeader, 4);
